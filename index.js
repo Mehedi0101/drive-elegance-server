@@ -1,16 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(express.json());
 app.use(cors());
-
-// drive-elegance
-// JIYlAIhTZpMrsNEt
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gxsfvvy.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -28,16 +25,25 @@ async function run() {
 
         // products-collection
         const productCollection = client.db("productDB").collection("product");
+        const userCollection = client.db("userDB").collection("user");
 
         // Get all products
-        app.get('/products', async(req,res) => {
+        app.get('/products', async (req, res) => {
             const cursor = productCollection.find();
             const result = await cursor.toArray();
             res.send(result);
         })
 
+        // get products by id
+        app.get('/products-id/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await productCollection.findOne(query);
+            res.send(result);
+        })
+
         // Get products by brand name
-        app.get('/products/:brand', async(req,res) => {
+        app.get('/products-brand/:brand', async (req, res) => {
             const brandName = req.params.brand;
             const query = { brand: brandName };
             const cursor = productCollection.find(query);
@@ -46,13 +52,18 @@ async function run() {
         })
 
         // Add Product
-        app.post('/products',async(req,res) => {
+        app.post('/products', async (req, res) => {
             const product = req.body;
             console.log(product);
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
 
+        // Add New Users
+        app.post('/users',async(req,res) => {
+            const newUser = req.body;
+            console.log(newUser);
+        })
 
 
         // Send a ping to confirm a successful connection
@@ -65,9 +76,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
-app.get('/brands', (req, res) => {
+app.get('/brands', async (req, res) => {
     res.send(
         [
             {
