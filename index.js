@@ -29,6 +29,22 @@ async function run() {
         // products-collection
         const productCollection = client.db("productDB").collection("product");
 
+        // Get all products
+        app.get('/products', async(req,res) => {
+            const cursor = productCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // Get products by brand name
+        app.get('/products/:brand', async(req,res) => {
+            const brandName = req.params.brand;
+            const query = { brand: brandName };
+            const cursor = productCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Add Product
         app.post('/products',async(req,res) => {
             const product = req.body;
@@ -76,13 +92,13 @@ app.get('/brands', (req, res) => {
             },
             {
                 "id": 5,
-                "name": "Honda",
-                "image": "https://i.ibb.co/K7DFvsg/honda.png"
+                "name": "Volkswagen",
+                "image": "https://i.ibb.co/JknKXWj/volkswagen.png"
             },
             {
                 "id": 6,
-                "name": "Volkswagen",
-                "image": "https://i.ibb.co/JknKXWj/volkswagen.png"
+                "name": "Honda",
+                "image": "https://i.ibb.co/K7DFvsg/honda.png"
             }
         ]
 
