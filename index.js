@@ -54,15 +54,54 @@ async function run() {
         // Add Product
         app.post('/products', async (req, res) => {
             const product = req.body;
-            console.log(product);
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
 
-        // Add New Users
-        app.post('/users',async(req,res) => {
+        // Get all users
+        app.get('/users', async (req, res) => {
+            const cursor = userCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // Get user by email
+        app.get('/users/:email', async (req, res) => {
+            const userEmail = req.params.email;
+            const query = { email: userEmail };
+            const result = await userCollection.findOne(query);
+            res.send(result);
+        })
+
+        // Update Cart
+        app.put('/users/:email', async (req,res) => {
+            const userEmail = req.params.email;
+            const user = req.body;
+            console.log(user);
+            const filter = { email: userEmail };
+            const options = { upsert: true };
+            const updatedUser = {
+                $set: {
+                    cart: user.cart
+                }
+            }
+            const result = await userCollection.updateOne(filter,updatedUser,options);
+            res.send(result);
+        })
+
+
+        // Add a new user
+        app.post('/users', async (req, res) => {
             const newUser = req.body;
-            console.log(newUser);
+
+            const cursor = userCollection.find();
+            const allUsers = await cursor.toArray();
+            const alreadyCreated = allUsers.find(user => user.email === newUser.email);
+
+            if (!alreadyCreated) {
+                const result = await userCollection.insertOne(newUser);
+                res.send(result);
+            }
         })
 
 
