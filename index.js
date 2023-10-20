@@ -51,10 +51,30 @@ async function run() {
             res.send(result);
         })
 
-        // Add Product
+        // Add product
         app.post('/products', async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
+        // Update a product
+        app.put('/products-id/:id', async(req,res) => {
+            const id = req.params.id;
+            const product = req.body;
+            const filter = {_id: new ObjectId(id)};
+            const options = {upsert: true};
+            const updatedProduct = {
+                $set: {
+                    name: product.name,
+                    image: product.image,
+                    brand: product.brand,
+                    type: product.type,
+                    price: product.price,
+                    rating: product.rating
+                }
+            };
+            const result = await productCollection.updateOne(filter, updatedProduct, options);
             res.send(result);
         })
 
@@ -104,6 +124,45 @@ async function run() {
             }
         })
 
+        // Get brands
+        app.get('/brands', async (req, res) => {
+            res.send(
+                [
+                    {
+                        "id": 1,
+                        "name": "Ford",
+                        "image": "https://i.ibb.co/QYYB21y/ford.png"
+                    },
+                    {
+                        "id": 2,
+                        "name": "Toyota",
+                        "image": "https://i.ibb.co/z7Ljf1s/toyota.png"
+                    },
+                    {
+                        "id": 3,
+                        "name": "BMW",
+                        "image": "https://i.ibb.co/wNN22GZ/bmw.png"
+                    },
+                    {
+                        "id": 4,
+                        "name": "Mercedes-Benz",
+                        "image": "https://i.ibb.co/wYjpktP/mercedez.png"
+                    },
+                    {
+                        "id": 5,
+                        "name": "Volkswagen",
+                        "image": "https://i.ibb.co/JknKXWj/volkswagen.png"
+                    },
+                    {
+                        "id": 6,
+                        "name": "Honda",
+                        "image": "https://i.ibb.co/K7DFvsg/honda.png"
+                    }
+                ]
+        
+            )
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
@@ -114,44 +173,6 @@ async function run() {
     }
 }
 run().catch(console.dir);
-
-app.get('/brands', async (req, res) => {
-    res.send(
-        [
-            {
-                "id": 1,
-                "name": "Ford",
-                "image": "https://i.ibb.co/QYYB21y/ford.png"
-            },
-            {
-                "id": 2,
-                "name": "Toyota",
-                "image": "https://i.ibb.co/z7Ljf1s/toyota.png"
-            },
-            {
-                "id": 3,
-                "name": "BMW",
-                "image": "https://i.ibb.co/wNN22GZ/bmw.png"
-            },
-            {
-                "id": 4,
-                "name": "Mercedes-Benz",
-                "image": "https://i.ibb.co/wYjpktP/mercedez.png"
-            },
-            {
-                "id": 5,
-                "name": "Volkswagen",
-                "image": "https://i.ibb.co/JknKXWj/volkswagen.png"
-            },
-            {
-                "id": 6,
-                "name": "Honda",
-                "image": "https://i.ibb.co/K7DFvsg/honda.png"
-            }
-        ]
-
-    )
-})
 
 
 app.listen(port, () => {
